@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grupo Mopal - Concesionario Oficial Toyota en Pucallpa, Huánuco y Pasco</title>
+
+  <!-- Tailwind CSS & FontAwesome CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- React 18 & Babel CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&display=swap');
+    body {
+      font-family: 'Montserrat', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased overflow-x-hidden">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useMemo } = React;
+
+    // Logo oficial proveniente del enlace de LinkedIn brindado por el usuario
+    const MOPAL_LOGO_URL = "https://media.licdn.com/dms/image/v2/D4E0BAQGuyrcZWanbWg/company-logo_200_200/company-logo_200_200/0/1693504743835/automotores_mopal_s_a__logo?e=2147483647&v=beta&t=1RJ5lADe9i-YpdCc2zR5kE7zciXq1QSPKYkerE-GGhM";
+
+    // Base de datos de vehículos con imágenes reales y precios oficiales para Perú (Tipo de cambio aprox 3.75)
+    const VEHICULOS_DATA = [
+      {
+        id: 'yaris',
+        nombre: 'Toyota Yaris Sedán',
+        categoria: 'Sedán',
+        subcategoria: 'economico',
+        tipo: 'nuevo',
+        precioUsd: 17890,
+        precioPen: 67087,
+        cuotaAproxUsd: 195,
+        badge: 'Más Vendido en Perú',
+        imagen: 'https://www.mitsuiautomotriz.com/sites/default/files/2024-01/BANNER_INTERNA_MODELOS_1080x1586_TOYOTA_Yaris%20%281%29.jpg',
+        motor: '1.5L Dual VVT-i (106 HP)',
+        transmision: 'Manual 5V / CVT 7V',
+        traccion: '4x2 FWD',
+        pasajeros: '5 Asientos',
+        combustible: 'Gasolina / Opción GNV-GLP',
+        potencia: '106 HP @ 6,000 RPM',
+        garantia: '5 años o 100,000 km'
+      },
+      {
+        id: 'corolla-cross',
+        nombre: 'Toyota Corolla Cross',
+        categoria: 'SUV',
+        subcategoria: 'hibrido',
+        tipo: 'nuevo',
+        precioUsd: 28990,
+        precioPen: 108712,
+        cuotaAproxUsd: 290,
+        badge: 'SUV Preferida',
+        imagen: 'https://www.toyotaperu.com.pe/sites/default/files/2026-10/cabecera-modelo-corolla-cross-m.webp',
+        motor: '1.8L VVT-i Híbrido Auto-recargable',
+        transmision: 'Automática e-CVT',
+        traccion: '4x2 FWD',
+        pasajeros: '5 Asientos',
+        combustible: 'Híbrido Gasolina / Eléctrico',
+        potencia: '122 HP Combinados',
+        garantia: '5 años vehículo / 8 años batería híbrida'
+      },
+      {
+        id: 'rav4',
+        nombre: 'Toyota RAV4 Híbrida',
+        categoria: 'SUV',
+        subcategoria: 'hibrido',
+        tipo: 'nuevo',
+        precioUsd: 36490,
+        precioPen: 136837,
+        cuotaAproxUsd: 375,
+        badge: 'Nuevo 2026',
+        imagen: 'https://www.mitsuiautomotriz.com/sites/default/files/2026-05/toyota-rav4-hibrida-suv-todoterreno.jpg',
+        motor: '2.5L Dynamic Force Híbrido',
+        transmision: 'Automática e-CVT',
+        traccion: 'AWD-i Intuitiva',
+        pasajeros: '5 Asientos',
+        combustible: 'Híbrido Self-Charging',
+        potencia: '219 HP Combinados',
+        garantia: '5 años o 100,000 km'
+      },
+      {
+        id: 'hilux',
+        nombre: 'Toyota Hilux 4x4 Doble Cabina',
+        categoria: 'Pick-up',
+        subcategoria: '4x4',
+        tipo: 'nuevo',
+        precioUsd: 39890,
+        precioPen: 149587,
+        cuotaAproxUsd: 410,
+        badge: 'Líder en Perú',
+        imagen: 'https://acnews.blob.core.windows.net/imgnews/paragraph/NPAZ_f48ec7d53c27405fa8004d4ce32cc6e1.webp',
+        motor: '2.8L Turbo Diésel Intercooler (1GD-FTV)',
+        transmision: 'Manual 6V / Automática 6V',
+        traccion: '4x4 con Bloqueo de Diferencial',
+        pasajeros: '5 Asientos (Doble Cabina)',
+        combustible: 'Diésel',
+        potencia: '201 HP @ 500 Nm',
+        garantia: '5 años o 100,000 km'
+      },
+      {
+        id: 'fortuner',
+        nombre: 'Toyota Fortuner 4x4',
+        categoria: 'SUV',
+        subcategoria: '4x4',
+        tipo: 'nuevo',
+        precioUsd: 51990,
+        precioPen: 194962,
+        cuotaAproxUsd: 530,
+        badge: '7 Pasajeros 4x4',
+        imagen: 'https://www.mitsuiautomotriz.com/sites/default/files/2024-01/BANNER_INTERNA_MODELOS_780X1105_TOYOTA_Fortuner.jpg',
+        motor: '2.8L Turbo Diésel Intercooler',
+        transmision: 'Automática Secuencial 6V',
+        traccion: '4x4 con Reductora (High/Low)',
+        pasajeros: '7 Asientos (3 Filas)',
+        combustible: 'Diésel',
+        potencia: '201 HP @ 500 Nm',
+        garantia: '5 años o 100,000 km'
+      },
+      {
+        id: 'prius',
+        nombre: 'Toyota Prius Quinta Generación',
+        categoria: 'Sedán',
+        subcategoria: 'hibrido',
+        tipo: 'hibrido',
+        precioUsd: 34990,
+        precioPen: 131212,
+        cuotaAproxUsd: 360,
+        badge: '100% Eco Tech',
+        imagen: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQG4xZ9oTcss8mnfHmTRiKcfp_2ZsgEy41t6wCo0q1djmyQgBcssxezd3sx&s=10',
+        motor: '2.0L 5ta Gen Hybrid Dynamic Force',
+        transmision: 'e-CVT',
+        traccion: '4x2 FWD',
+        pasajeros: '5 Asientos',
+        combustible: 'Híbrido de Alta Eficiencia',
+        potencia: '196 HP',
+        garantia: '8 años Batería / 5 años Vehículo'
+      },
+      {
+        id: 'prado',
+        nombre: 'Toyota Land Cruiser Prado',
+        categoria: 'SUV',
+        subcategoria: '4x4',
+        tipo: 'nuevo',
+        precioUsd: 68900,
+        precioPen: 258375,
+        cuotaAproxUsd: 690,
+        badge: 'Todo Terreno Premium',
+        imagen: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBHa3keBi4yZMLgEd1bR_DTI7z24VoucInaQulOe3KckXf0jgu46hnAg4&s=10',
+        motor: '2.8L Turbo Diésel / 2.4L Turbo Gasolina',
+        transmision: 'Automática 8V',
+        traccion: '4WD Permanente Torsen',
+        pasajeros: '7 Asientos (3 Filas)',
+        combustible: 'Diésel / Gasolina',
+        potencia: '281 HP',
+        garantia: '5 años o 100,000 km'
+      },
+      {
+        id: 'avanza',
+        nombre: 'Toyota Avanza Multi-Espacio',
+        categoria: 'Familia',
+        subcategoria: 'economico',
+        tipo: 'nuevo',
+        precioUsd: 20490,
+        precioPen: 76837,
+        cuotaAproxUsd: 215,
+        badge: 'Familiar 7 Asientos',
+        imagen: 'https://www.mitsuiautomotriz.com/sites/default/files/2023-02/CONOCELOS_TOYOTA_Avanza-02.jpg',
+        motor: '1.5L Dual VVT-i 4 Cilindros',
+        transmision: 'Manual 5V / CVT',
+        traccion: '4x2 RWD',
+        pasajeros: '7 Asientos',
+        combustible: 'Gasolina',
+        potencia: '104 HP',
+        garantia: '5 años o 100,000 km'
+      },
+      {
+        id: 'hilux-2022',
+        nombre: 'Toyota Hilux 2022 (Seminuevo Certificado)',
+        categoria: 'Pick-up',
+        subcategoria: '4x4',
+        tipo: 'seminuevo',
+        precioUsd: 29500,
+        precioPen: 110625,
+        cuotaAproxUsd: 310,
+        badge: 'Seminuevo Mopal',
+        imagen: 'https://www.mitsuiautomotriz.com/sites/default/files/2023-02/CONOCELOS_TOYOTA_Hilux-02_0.jpg',
+        motor: '2.4L Turbo Diésel',
+        transmision: 'Manual 6V',
+        traccion: '4x4',
+        pasajeros: '5 Asientos',
+        combustible: 'Diésel - 42,000 KM Reales',
+        potencia: '148 HP',
+        garantia: '1 año de Garantía Certificada Mopal'
+      }
+    ];
+
+    function App() {
+      const [vistaActual, setVistaActual] = useState('index.html');
+      const [modeloSeleccionado, setModeloSeleccionado] = useState(null);
+      const [comparador, setComparador] = useState([]);
+      const [menuMovil, setMenuMovil] = useState(false);
+      const [filtroCategoria, setFiltroCategoria] = useState('todos');
+      const [busqueda, setBusqueda] = useState('');
+
+      // Estado del Cotizador
+      const [cotizacion, setCotizacion] = useState({
+        modelo: 'yaris',
+        cuotaInicial: 20,
+        plazoMeses: 36,
+        nombre: '',
+        telefono: '',
+        correo: '',
+        sede: 'Pucallpa'
+      });
+
+      const navegar = (ruta, param = null) => {
+        setVistaActual(ruta);
+        setMenuMovil(false);
+        if (param) setModeloSeleccionado(param);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+
+      const toggleComparar = (vehiculo) => {
+        if (comparador.some(item => item.id === vehiculo.id)) {
+          setComparador(comparador.filter(item => item.id !== vehiculo.id));
+        } else {
+          if (comparador.length >= 3) {
+            alert('Puedes comparar un máximo de 3 vehículos simultáneamente.');
+            return;
+          }
+          setComparador([...comparador, vehiculo]);
+        }
+      };
+
+      const vehiculosFiltrados = useMemo(() => {
+        return VEHICULOS_DATA.filter(v => {
+          const coincideBusqueda = v.nombre.toLowerCase().includes(busqueda.toLowerCase()) || 
+                                   v.categoria.toLowerCase().includes(busqueda.toLowerCase());
+          
+          if (vistaActual === 'autos-nuevos.html') {
+            return coincideBusqueda && (filtroCategoria === 'todos' || v.categoria.toLowerCase() === filtroCategoria.toLowerCase());
+          }
+          if (vistaActual === 'autos-hibridos.html') {
+            return coincideBusqueda && (v.subcategoria === 'hibrido' || v.tipo === 'hibrido');
+          }
+          if (vistaActual === 'autos-seminuevos.html') {
+            return coincideBusqueda && v.tipo === 'seminuevo';
+          }
+          return coincideBusqueda;
+        });
+      }, [busqueda, filtroCategoria, vistaActual]);
+
+      const enviarWhatsapp = (e) => {
+        e.preventDefault();
+        const auto = VEHICULOS_DATA.find(v => v.id === cotizacion.modelo) || VEHICULOS_DATA[0];
+        const msg = `Hola Grupo Mopal Toyota Perú! 🇵🇪\n\n` +
+                    `Solicito cotización oficial para:\n` +
+                    `🚗 *Modelo:* ${auto.nombre}\n` +
+                    `💵 *Precio Base:* $${auto.precioUsd.toLocaleString()} USD (Aprox. S/ ${auto.precioPen.toLocaleString()} PEN)\n` +
+                    `📍 *Sede:* ${cotizacion.sede}\n` +
+                    `👤 *Cliente:* ${cotizacion.nombre}\n` +
+                    `📞 *Teléfono:* ${cotizacion.telefono}\n` +
+                    `✉️ *Correo:* ${cotizacion.correo}\n` +
+                    `📊 *Plan:* ${cotizacion.cuotaInicial}% Inicial a ${cotizacion.plazoMeses} meses`;
+        
+        window.open(`https://wa.me/51987654321?text=${encodeURIComponent(msg)}`, '_blank');
+      };
+
+      return (
+        <div className="min-h-screen flex flex-col justify-between bg-gray-50">
+          
+          {/* BARRA SUPERIOR INFORMATIVA */}
+          <div className="bg-neutral-900 text-white text-xs py-2 px-4 border-b border-neutral-800">
+            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+              <div className="flex items-center gap-4">
+                <span><i className="fas fa-map-marker-alt text-red-600 mr-1"></i> Sedes: Pucallpa | Huánuco | Pasco</span>
+                <span className="hidden md:inline"><i className="fas fa-clock text-red-600 mr-1"></i> Atención: Lun - Sáb 8:00 AM - 6:30 PM</span>
+              </div>
+              <div className="flex items-center gap-4">
+                <a href="tel:061123456" className="hover:text-red-500 transition-colors"><i className="fas fa-phone mr-1"></i> (061) 123-456</a>
+                <button onClick={() => navegar('cotizar.html')} className="text-red-500 font-bold hover:underline">
+                  <i className="fas fa-calculator mr-1"></i> Simular Cuota
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* BARRA DE NAVEGACIÓN */}
+          <nav className="sticky top-0 z-50 bg-white shadow-md border-b border-gray-200">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+              
+              {/* LOGO OFICIAL GRUPO MOPAL */}
+              <div onClick={() => navegar('index.html')} className="cursor-pointer flex items-center gap-3">
+                <img 
+                  src={MOPAL_LOGO_URL} 
+                  alt="Automotores Mopal Toyota Logo" 
+                  className="w-12 h-12 object-contain rounded-full border border-gray-200 shadow-sm" 
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+                <div>
+                  <div className="flex items-center gap-1 font-black text-xl tracking-tighter text-gray-900 leading-none">
+    
+                  </div>
+                  <p className="text-[10px] font-bold tracking-widest text-gray-500 uppercase mt-0.5">Concesionario Oficial en Perú</p>
+                </div>
+              </div>
+
+              {/* MENÚ DE NAVEGACIÓN DESKTOP */}
+              <ul className="hidden lg:flex items-center gap-6 font-semibold text-sm text-gray-800">
+                <li>
+                  <button 
+                    onClick={() => navegar('index.html')} 
+                    className={`hover:text-red-600 transition-colors ${vistaActual === 'index.html' ? 'text-red-600 font-bold' : ''}`}
+                  >
+                    Inicio
+                  </button>
+                </li>
+                
+                {/* DESPLEGABLE AUTOS */}
+                <li className="relative group py-6">
+                  <button className="flex items-center gap-1 hover:text-red-600 transition-colors">
+                    Autos <i className="fas fa-chevron-down text-xs"></i>
+                  </button>
+                  <div className="absolute top-full left-0 w-52 bg-white border border-gray-200 shadow-xl rounded-xl py-2 hidden group-hover:block transition-all">
+                    <button onClick={() => navegar('autos-nuevos.html')} className="w-full text-left px-4 py-2 hover:bg-gray-50 text-xs font-bold text-gray-700">Autos Nuevos 2026</button>
+                    <button onClick={() => navegar('autos-seminuevos.html')} className="w-full text-left px-4 py-2 hover:bg-gray-50 text-xs font-bold text-gray-700">Seminuevos Certificados</button>
+                    <button onClick={() => navegar('autos-hibridos.html')} className="w-full text-left px-4 py-2 hover:bg-gray-50 text-xs font-bold text-gray-700">Gama Híbrida Toyota</button>
+                  </div>
+                </li>
+
+                {/* DESPLEGABLE SERVICIOS */}
+                <li className="relative group py-6">
+                  <button className="flex items-center gap-1 hover:text-red-600 transition-colors">
+                    Servicios <i className="fas fa-chevron-down text-xs"></i>
+                  </button>
+                  <div className="absolute top-full left-0 w-52 bg-white border border-gray-200 shadow-xl rounded-xl py-2 hidden group-hover:block transition-all">
+                    <button onClick={() => navegar('beneficios.html')} className="w-full text-left px-4 py-2 hover:bg-gray-50 text-xs font-bold text-gray-700">Beneficios Mopal</button>
+                    <button onClick={() => navegar('servicio-tecnico.html')} className="w-full text-left px-4 py-2 hover:bg-gray-50 text-xs font-bold text-gray-700">Servicio Técnico</button>
+                    <button onClick={() => navegar('postventa.html')} className="w-full text-left px-4 py-2 hover:bg-gray-50 text-xs font-bold text-gray-700">Postventa y Repuestos</button>
+                    <button onClick={() => navegar('seguro.html')} className="w-full text-left px-4 py-2 hover:bg-gray-50 text-xs font-bold text-gray-700">Seguro Toyota</button>
+                  </div>
+                </li>
+
+                <li>
+                  <button onClick={() => navegar('nosotros.html')} className={`hover:text-red-600 transition-colors ${vistaActual === 'nosotros.html' ? 'text-red-600 font-bold' : ''}`}>
+                    Nosotros
+                  </button>
+                </li>
+
+                <li>
+                  <button onClick={() => navegar('contacto.html')} className={`hover:text-red-600 transition-colors ${vistaActual === 'contacto.html' ? 'text-red-600 font-bold' : ''}`}>
+                    Sedes
+                  </button>
+                </li>
+
+                {comparador.length > 0 && (
+                  <li>
+                    <button onClick={() => navegar('comparar.html')} className="bg-black text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-md hover:bg-gray-800">
+                      <i className="fas fa-balance-scale text-red-500"></i>
+                      <span>Comparar ({comparador.length})</span>
+                    </button>
+                  </li>
+                )}
+
+                <li>
+                  <button
+                    onClick={() => navegar('cotizar.html')}
+                    className="bg-red-600 text-white font-bold text-xs uppercase px-5 py-2.5 rounded-full shadow-lg hover:bg-red-700 transition-transform active:scale-95 flex items-center gap-2"
+                  >
+                    <span>Cotizar</span>
+                    <i className="fas fa-arrow-right"></i>
+                  </button>
+                </li>
+              </ul>
+
+              {/* BOTÓN MÓVIL */}
+              <button onClick={() => setMenuMovil(!menuMovil)} className="lg:hidden text-2xl text-gray-800 p-2">
+                <i className={menuMovil ? "fas fa-times" : "fas fa-bars"}></i>
+              </button>
+            </div>
+
+            {/* MENÚ MÓVIL */}
+            {menuMovil && (
+              <div className="lg:hidden bg-white border-b border-gray-200 px-6 py-6 flex flex-col gap-4 shadow-xl">
+                <button onClick={() => navegar('index.html')} className="text-left font-bold text-gray-800 py-2 border-b border-gray-100">Inicio</button>
+                <div className="flex flex-col gap-2 pl-3">
+                  <span className="text-xs font-bold text-red-600 uppercase tracking-wider">Modelos Toyota</span>
+                  <button onClick={() => navegar('autos-nuevos.html')} className="text-left text-sm text-gray-700 py-1">Autos Nuevos</button>
+                  <button onClick={() => navegar('autos-seminuevos.html')} className="text-left text-sm text-gray-700 py-1">Seminuevos</button>
+                  <button onClick={() => navegar('autos-hibridos.html')} className="text-left text-sm text-gray-700 py-1">Híbridos</button>
+                </div>
+                <div className="flex flex-col gap-2 pl-3 border-t border-gray-100 pt-2">
+                  <span className="text-xs font-bold text-red-600 uppercase tracking-wider">Servicios</span>
+                  <button onClick={() => navegar('beneficios.html')} className="text-left text-sm text-gray-700 py-1">Beneficios</button>
+                  <button onClick={() => navegar('servicio-tecnico.html')} className="text-left text-sm text-gray-700 py-1">Servicio Técnico</button>
+                  <button onClick={() => navegar('postventa.html')} className="text-left text-sm text-gray-700 py-1">Postventa</button>
+                  <button onClick={() => navegar('seguro.html')} className="text-left text-sm text-gray-700 py-1">Seguro Toyota</button>
+                </div>
+                <button onClick={() => navegar('nosotros.html')} className="text-left font-bold text-gray-800 py-2 border-b border-gray-100">Nosotros</button>
+                <button onClick={() => navegar('contacto.html')} className="text-left font-bold text-gray-800 py-2 border-b border-gray-100">Sedes y Contacto</button>
+                <button
+                  onClick={() => navegar('cotizar.html')}
+                  className="w-full bg-red-600 text-white font-bold text-center py-3 rounded-xl uppercase text-xs tracking-wider shadow-md"
+                >
+                  Solicitar Cotización Online
+                </button>
+              </div>
+            )}
+          </nav>
+
+          {/* VISTA 1: INICIO (INDEX.HTML) */}
+          {vistaActual === 'index.html' && (
+            <main>
+              {/* HERO SECTION */}
+              <section className="relative bg-neutral-900 text-white py-24 lg:py-32 overflow-hidden border-b-4 border-red-600">
+                    <div className="absolute inset-0 z-0 opacity-40">
+  <img
+    src="https://delivery.tcom.assetscs.toyota.com/adobe/assets/urn:aaid:aem:c7de5fe7-4f40-4004-81f7-110f9b8f05da/as/TUN_MY27_0027_V001.png"
+    alt="Toyota Hilux Perú"
+    className="w-full h-full object-cover -scale-x-100"
+  />
+  <div className="absolute inset-0 bg-gradient-to-r from-neutral-950 via-neutral-900/85 to-transparent"></div>
+</div>
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                  <div className="max-w-2xl">
+                    <div className="flex items-center gap-3 mb-6">
+                      <img 
+                        src={MOPAL_LOGO_URL} 
+                        alt="Logo Mopal" 
+                        className="w-10 h-10 object-contain rounded-full border border-white/30" 
+                      />
+                      <span className="bg-red-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
+                        Concesionario Autorizado Toyota del Perú
+                      </span>
+                    </div>
+
+                    <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-tight uppercase mb-4">
+                      Tu próximo <br />
+                      <span className="text-red-500">Toyota te espera</span>
+                    </h1>
+                    <p className="text-base sm:text-lg text-gray-300 mb-8 font-medium">
+                      Atención personalizada y vehículos con garantía de fábrica en Pucallpa, Huánuco y Pasco.
+                    </p>
+
+                    {/* ESTADÍSTICAS */}
+                    <div className="grid grid-cols-3 gap-4 border-t border-gray-800 pt-6 mb-8">
+                      <div>
+                        <p className="text-2xl sm:text-3xl font-black text-white">15+</p>
+                        <p className="text-[10px] sm:text-xs text-gray-400 font-bold uppercase">Años de experiencia</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl sm:text-3xl font-black text-white">1000+</p>
+                        <p className="text-[10px] sm:text-xs text-gray-400 font-bold uppercase">Clientes Satisfechos</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl sm:text-3xl font-black text-white">3</p>
+                        <p className="text-[10px] sm:text-xs text-gray-400 font-bold uppercase">Sedes en Perú</p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-4">
+                      <button
+                        onClick={() => navegar('autos-nuevos.html')}
+                        className="bg-red-600 hover:bg-red-700 text-white font-bold px-8 py-4 rounded-xl shadow-xl transition-all flex items-center gap-3 uppercase text-xs tracking-wider"
+                      >
+                        <span>Ver Modelos Disponibles</span>
+                        <i className="fas fa-chevron-right"></i>
+                      </button>
+                      <button
+                        onClick={() => navegar('cotizar.html')}
+                        className="bg-white/10 hover:bg-white/20 text-white border border-white/30 font-bold px-8 py-4 rounded-xl backdrop-blur transition-all flex items-center gap-2 uppercase text-xs tracking-wider"
+                      >
+                        <i className="fas fa-calculator text-red-500"></i>
+                        <span>Simular Plan</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* BENEFICIOS DESTACADOS */}
+              <section className="py-20 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <div className="text-center max-w-2xl mx-auto mb-16">
+                    <h2 className="text-3xl font-black uppercase tracking-tight text-gray-900">
+                      Beneficios <span className="text-red-600">Exclusivos Mopal</span>
+                    </h2>
+                    <p className="text-gray-500 text-sm mt-2 font-medium">
+                      Todo lo que necesitas para llevar tu Toyota a casa con total respaldo.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 hover:shadow-xl transition-all group border-t-4 border-t-red-600">
+                      <div className="w-12 h-12 rounded-xl bg-red-100 text-red-600 flex items-center justify-center text-xl font-bold mb-4 group-hover:scale-110 transition-transform">
+                        <i className="fas fa-exchange-alt"></i>
+                      </div>
+                      <h3 className="font-bold text-lg text-gray-900 mb-2">Auto en Parte de Pago</h3>
+                      <p className="text-gray-600 text-xs leading-relaxed mb-4">
+                        Aceptamos tu auto usado de cualquier marca con tasación rápida y confiable.
+                      </p>
+                      <button onClick={() => navegar('beneficios.html')} className="text-xs font-bold text-red-600 flex items-center gap-1 hover:underline">
+                        Saber más <i className="fas fa-arrow-right"></i>
+                      </button>
+                    </div>
+
+                    <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 hover:shadow-xl transition-all group border-t-4 border-t-red-600">
+                      <div className="w-12 h-12 rounded-xl bg-red-100 text-red-600 flex items-center justify-center text-xl font-bold mb-4 group-hover:scale-110 transition-transform">
+                        <i className="fas fa-shield-alt"></i>
+                      </div>
+                      <h3 className="font-bold text-lg text-gray-900 mb-2">Seguro Toyota</h3>
+                      <p className="text-gray-600 text-xs leading-relaxed mb-4">
+                        Protección con talleres certificados y repuestos 100% genuinos.
+                      </p>
+                      <button onClick={() => navegar('seguro.html')} className="text-xs font-bold text-red-600 flex items-center gap-1 hover:underline">
+                        Saber más <i className="fas fa-arrow-right"></i>
+                      </button>
+                    </div>
+
+                    <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 hover:shadow-xl transition-all group border-t-4 border-t-red-600">
+                      <div className="w-12 h-12 rounded-xl bg-red-100 text-red-600 flex items-center justify-center text-xl font-bold mb-4 group-hover:scale-110 transition-transform">
+                        <i className="fas fa-chart-line"></i>
+                      </div>
+                      <h3 className="font-bold text-lg text-gray-900 mb-2">Plan Toyota Life</h3>
+                      <p className="text-gray-600 text-xs leading-relaxed mb-4">
+                        Planes de financiamiento con cuotas reducidas hasta 50% en comparación a un crédito tradicional.
+                      </p>
+                      <button onClick={() => navegar('beneficios.html')} className="text-xs font-bold text-red-600 flex items-center gap-1 hover:underline">
+                        Saber más <i className="fas fa-arrow-right"></i>
+                      </button>
+                    </div>
+
+                    <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 hover:shadow-xl transition-all group border-t-4 border-t-red-600">
+                      <div className="w-12 h-12 rounded-xl bg-red-100 text-red-600 flex items-center justify-center text-xl font-bold mb-4 group-hover:scale-110 transition-transform">
+                        <i className="fas fa-tools"></i>
+                      </div>
+                      <h3 className="font-bold text-lg text-gray-900 mb-2">Toyota Value</h3>
+                      <p className="text-gray-600 text-xs leading-relaxed mb-4">
+                        Paquetes de mantenimiento prepagados para garantizar el estado impecable de tu vehículo.
+                      </p>
+                      <button onClick={() => navegar('servicio-tecnico.html')} className="text-xs font-bold text-red-600 flex items-center gap-1 hover:underline">
+                        Saber más <i className="fas fa-arrow-right"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* MODELOS DESTACADOS */}
+              <section className="py-20 bg-gray-100 border-t border-gray-200">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
+                    <div>
+                      <h2 className="text-3xl font-black uppercase text-gray-900">
+                        Modelos <span className="text-red-600">Destacados</span>
+                      </h2>
+                      <p className="text-gray-500 text-sm font-medium mt-1">Precios oficiales en Dólares ($ USD) e indicativos en Soles (S/ PEN)</p>
+                    </div>
+                    <button
+                      onClick={() => navegar('autos-nuevos.html')}
+                      className="bg-black hover:bg-gray-800 text-white font-bold text-xs uppercase px-6 py-3 rounded-xl transition-colors"
+                    >
+                      Ver Catálogo Completo →
+                    </button>
+                  </div>
+
+                  {/* CARDS */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {VEHICULOS_DATA.slice(0, 3).map((vehiculo) => (
+                      <div key={vehiculo.id} className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-xl transition-all flex flex-col justify-between">
+                        <div>
+                          <div className="relative h-56 bg-gray-200 overflow-hidden">
+                            <img
+                              src={vehiculo.imagen}
+                              alt={vehiculo.nombre}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                            <span className="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full shadow-md">
+                              {vehiculo.badge}
+                            </span>
+                            <button
+                              onClick={() => toggleComparar(vehiculo)}
+                              className={`absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold border transition-colors shadow-md ${
+                                comparador.some(c => c.id === vehiculo.id)
+                                  ? 'bg-red-600 text-white border-red-600'
+                                  : 'bg-white/90 text-gray-700 border-gray-300 hover:bg-white'
+                              }`}
+                              title="Comparar modelo"
+                            >
+                              <i className="fas fa-balance-scale"></i>
+                            </button>
+                          </div>
+
+                          <div className="p-6">
+                            <div className="flex justify-between items-start mb-2">
+                              <h3 className="font-black text-xl text-gray-900">{vehiculo.nombre}</h3>
+                              <span className="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                                {vehiculo.categoria}
+                              </span>
+                            </div>
+
+                            <div className="mb-4">
+                              <p className="text-2xl font-black text-red-600">
+                                ${vehiculo.precioUsd.toLocaleString()} <span className="text-xs font-semibold text-gray-400">USD</span>
+                              </p>
+                              <p className="text-xs font-bold text-gray-500">
+                                ~ S/ {vehiculo.precioPen.toLocaleString()} PEN
+                              </p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 border-t border-gray-100 pt-4 mb-4">
+                              <div><i className="fas fa-gas-pump text-red-600 mr-1"></i> {vehiculo.combustible}</div>
+                              <div><i className="fas fa-cog text-red-600 mr-1"></i> {vehiculo.transmision}</div>
+                              <div><i className="fas fa-users text-red-600 mr-1"></i> {vehiculo.pasajeros}</div>
+                              <div><i className="fas fa-tachometer-alt text-red-600 mr-1"></i> {vehiculo.potencia}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-6 pt-0 flex gap-2">
+                          <button
+                            onClick={() => navegar('modelo.html', vehiculo)}
+                            className="flex-1 bg-neutral-900 hover:bg-black text-white font-bold text-xs uppercase py-3 rounded-xl transition-colors text-center"
+                          >
+                            Ver Detalles
+                          </button>
+                          <button
+                            onClick={() => {
+                              setCotizacion({ ...cotizacion, modelo: vehiculo.id });
+                              navegar('cotizar.html');
+                            }}
+                            className="bg-red-600 hover:bg-red-700 text-white px-4 rounded-xl font-bold text-xs flex items-center justify-center shadow-md"
+                          >
+                            <i className="fas fa-calculator"></i>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+
+              {/* BANNER ASESORÍA */}
+              <section className="py-16 bg-red-600 text-white relative overflow-hidden">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+                  <div>
+                    <h2 className="text-3xl font-black uppercase tracking-tight mb-2">📞 ¿Hablamos de tu próximo Toyota?</h2>
+                    <p className="text-white/80 text-sm font-medium">Nuestros asesores están listos para atenderte desde Pucallpa, Huánuco o Pasco.</p>
+                  </div>
+                  <a
+                    href="https://wa.me/51987654321?text=Hola%20Grupo%20Mopal,%20deseo%20informaci%C3%B3n%20sobre%20los%20modelos%20Toyota"
+                    target="_blank"
+                    className="bg-white text-red-600 hover:bg-gray-100 font-black px-8 py-4 rounded-xl shadow-2xl flex items-center gap-3 uppercase text-xs tracking-wider transition-transform active:scale-95"
+                  >
+                    <i className="fab fa-whatsapp text-xl"></i>
+                    <span>Contactar por WhatsApp</span>
+                  </a>
+                </div>
+              </section>
+            </main>
+          )}
+
+          {/* VISTA 2: CATÁLOGOS (AUTOS NUEVOS / HÍBRIDOS / SEMINUEVOS) */}
+          {(vistaActual === 'autos-nuevos.html' || vistaActual === 'autos-hibridos.html' || vistaActual === 'autos-seminuevos.html') && (
+            <main className="py-12 bg-gray-50 flex-1">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div className="mb-8 border-b border-gray-200 pb-6">
+                  <h1 className="text-3xl sm:text-4xl font-black uppercase text-gray-900">
+                    {vistaActual === 'autos-nuevos.html' && <span>Autos <span className="text-red-600">Nuevos 2026</span></span>}
+                    {vistaActual === 'autos-hibridos.html' && <span>Gama <span className="text-emerald-600">Híbrida Toyota</span></span>}
+                    {vistaActual === 'autos-seminuevos.html' && <span>Seminuevos <span className="text-red-600">Certificados Mopal</span></span>}
+                  </h1>
+                  <p className="text-gray-500 text-sm mt-1 font-medium">
+                    Precios oficiales para el mercado de Perú.
+                  </p>
+                </div>
+
+                {/* FILTROS Y BÚSQUEDA */}
+                <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-8 bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
+                  <div className="relative w-full md:w-80">
+                    <i className="fas fa-search absolute left-3.5 top-3.5 text-gray-400 text-sm"></i>
+                    <input
+                      type="text"
+                      placeholder="Buscar por modelo o categoría..."
+                      value={busqueda}
+                      onChange={(e) => setBusqueda(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-red-600"
+                    />
+                  </div>
+
+                  {vistaActual === 'autos-nuevos.html' && (
+                    <div className="flex flex-wrap gap-2 w-full md:w-auto">
+                      {['todos', 'suv', 'pick-up', 'sedán', 'familia'].map((cat) => (
+                        <button
+                          key={cat}
+                          onClick={() => setFiltroCategoria(cat)}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold uppercase transition-all border ${
+                            filtroCategoria === cat
+                              ? 'bg-red-600 text-white border-red-600 shadow-md'
+                              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* GRID DE PRODUCTOS */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {vehiculosFiltrados.map((vehiculo) => (
+                    <div key={vehiculo.id} className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-xl transition-all flex flex-col justify-between">
+                      <div>
+                        <div className="relative h-56 bg-gray-200 overflow-hidden">
+                          <img
+                            src={vehiculo.imagen}
+                            alt={vehiculo.nombre}
+                            className="w-full h-full object-cover"
+                          />
+                          <span className="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full shadow-md">
+                            {vehiculo.badge}
+                          </span>
+                          <button
+                            onClick={() => toggleComparar(vehiculo)}
+                            className={`absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold border transition-colors shadow-md ${
+                              comparador.some(c => c.id === vehiculo.id)
+                                ? 'bg-red-600 text-white border-red-600'
+                                : 'bg-white/90 text-gray-700 border-gray-300 hover:bg-white'
+                            }`}
+                          >
+                            <i className="fas fa-balance-scale"></i>
+                          </button>
+                        </div>
+
+                        <div className="p-6">
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className="font-black text-xl text-gray-900">{vehiculo.nombre}</h3>
+                            <span className="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                              {vehiculo.categoria}
+                            </span>
+                          </div>
+
+                          <div className="mb-2">
+                            <p className="text-2xl font-black text-red-600">
+                              ${vehiculo.precioUsd.toLocaleString()} <span className="text-xs font-semibold text-gray-400">USD</span>
+                            </p>
+                            <p className="text-xs font-bold text-gray-500">
+                              ~ S/ {vehiculo.precioPen.toLocaleString()} PEN
+                            </p>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 border-t border-gray-100 pt-4 mb-4">
+                            <div><i className="fas fa-gas-pump text-red-600 mr-1"></i> {vehiculo.combustible}</div>
+                            <div><i className="fas fa-cog text-red-600 mr-1"></i> {vehiculo.transmision}</div>
+                            <div><i className="fas fa-users text-red-600 mr-1"></i> {vehiculo.pasajeros}</div>
+                            <div><i className="fas fa-tachometer-alt text-red-600 mr-1"></i> {vehiculo.potencia}</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-6 pt-0 flex gap-2">
+                        <button
+                          onClick={() => navegar('modelo.html', vehiculo)}
+                          className="flex-1 bg-neutral-900 hover:bg-black text-white font-bold text-xs uppercase py-3 rounded-xl transition-colors text-center"
+                        >
+                          Ver Detalles
+                        </button>
+                        <button
+                          onClick={() => {
+                            setCotizacion({ ...cotizacion, modelo: vehiculo.id });
+                            navegar('cotizar.html');
+                          }}
+                          className="bg-red-600 hover:bg-red-700 text-white px-4 rounded-xl font-bold text-xs flex items-center justify-center shadow-md"
+                        >
+                          <i className="fas fa-calculator"></i>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </main>
+          )}
+
+          {/* VISTA 3: MODELO.HTML */}
+          {vistaActual === 'modelo.html' && modeloSeleccionado && (
+            <main className="py-12 bg-white flex-1">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <button onClick={() => navegar('autos-nuevos.html')} className="text-xs font-bold text-gray-500 hover:text-red-600 mb-6 flex items-center gap-2">
+                  <i className="fas fa-arrow-left"></i> Volver a Modelos
+                </button>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mb-16">
+                  <div className="rounded-3xl border-2 border-gray-200 overflow-hidden shadow-lg bg-gray-100">
+                    <img
+                      src={modeloSeleccionado.imagen}
+                      alt={modeloSeleccionado.nombre}
+                      className="w-full h-96 object-cover"
+                    />
+                  </div>
+
+                  <div>
+                    <span className="bg-red-100 text-red-600 text-xs font-black uppercase px-3 py-1 rounded-full">
+                      {modeloSeleccionado.badge}
+                    </span>
+                    <h1 className="text-4xl font-black text-gray-900 mt-2 mb-2">{modeloSeleccionado.nombre}</h1>
+                    
+                    <div className="mb-6">
+                      <p className="text-3xl font-black text-red-600">
+                        ${modeloSeleccionado.precioUsd.toLocaleString()} USD
+                      </p>
+                      <p className="text-sm font-bold text-gray-500">
+                        Equivalente aproximado: S/ {modeloSeleccionado.precioPen.toLocaleString()} PEN
+                      </p>
+                    </div>
+
+                    <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200 mb-6">
+                      <h3 className="font-bold text-sm text-gray-900 uppercase mb-4 border-b border-gray-200 pb-2">Especificaciones Técnicas</h3>
+                      <div className="grid grid-cols-2 gap-4 text-xs font-semibold text-gray-700">
+                        <div><strong className="text-gray-400 block text-[10px] uppercase">Motor</strong> {modeloSeleccionado.motor}</div>
+                        <div><strong className="text-gray-400 block text-[10px] uppercase">Transmisión</strong> {modeloSeleccionado.transmision}</div>
+                        <div><strong className="text-gray-400 block text-[10px] uppercase">Tracción</strong> {modeloSeleccionado.traccion}</div>
+                        <div><strong className="text-gray-400 block text-[10px] uppercase">Combustible</strong> {modeloSeleccionado.combustible}</div>
+                        <div><strong className="text-gray-400 block text-[10px] uppercase">Pasajeros</strong> {modeloSeleccionado.pasajeros}</div>
+                        <div><strong className="text-gray-400 block text-[10px] uppercase">Garantía Oficial</strong> {modeloSeleccionado.garantia}</div>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4">
+                      <button
+                        onClick={() => {
+                          setCotizacion({ ...cotizacion, modelo: modeloSeleccionado.id });
+                          navegar('cotizar.html');
+                        }}
+                        className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl uppercase text-xs tracking-wider shadow-lg transition-transform active:scale-95"
+                      >
+                        Cotizar Modelo
+                      </button>
+                      <a
+                        href={`https://wa.me/51987654321?text=Hola,%20quisiera%20cotizaci%C3%B3n%20para%20el%20${encodeURIComponent(modeloSeleccionado.nombre)}`}
+                        target="_blank"
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-4 rounded-xl flex items-center justify-center text-lg"
+                      >
+                        <i className="fab fa-whatsapp"></i>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </main>
+          )}
+
+          {/* VISTA 4: COMPARAR.HTML */}
+          {vistaActual === 'comparar.html' && (
+            <main className="py-12 bg-gray-50 flex-1">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h1 className="text-3xl font-black uppercase text-gray-900 mb-2">Comparador de <span className="text-red-600">Modelos Toyota</span></h1>
+                <p className="text-gray-500 text-sm mb-8 font-medium">Contrasta especificaciones clave entre modelos.</p>
+
+                {comparador.length === 0 ? (
+                  <div className="bg-white p-12 rounded-2xl border border-gray-200 text-center">
+                    <i className="fas fa-balance-scale text-4xl text-gray-300 mb-4"></i>
+                    <p className="font-bold text-gray-700 mb-4">No has seleccionado vehículos para comparar.</p>
+                    <button onClick={() => navegar('autos-nuevos.html')} className="bg-red-600 text-white font-bold text-xs uppercase px-6 py-3 rounded-xl">
+                      Ir al Catálogo
+                    </button>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto bg-white rounded-2xl border border-gray-200 shadow-sm">
+                    <table className="w-full text-left border-collapse min-w-[600px]">
+                      <thead>
+                        <tr className="border-b border-gray-200 bg-gray-50">
+                          <th className="p-4 text-xs uppercase font-black text-gray-400 w-1/4">Característica</th>
+                          {comparador.map(item => (
+                            <th key={item.id} className="p-4 w-1/4">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h3 className="font-black text-sm text-gray-900">{item.nombre}</h3>
+                                  <p className="text-red-600 font-bold text-sm">${item.precioUsd.toLocaleString()} USD</p>
+                                </div>
+                                <button onClick={() => toggleComparar(item)} className="text-gray-400 hover:text-red-600 text-xs">✕</button>
+                              </div>
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="text-xs font-semibold text-gray-700 divide-y divide-gray-100">
+                        <tr><td className="p-4 font-bold bg-gray-50/50">Precio en Soles</td>{comparador.map(i => <td key={i.id} className="p-4">S/ {i.precioPen.toLocaleString()} PEN</td>)}</tr>
+                        <tr><td className="p-4 font-bold bg-gray-50/50">Categoría</td>{comparador.map(i => <td key={i.id} className="p-4">{i.categoria}</td>)}</tr>
+                        <tr><td className="p-4 font-bold bg-gray-50/50">Motor</td>{comparador.map(i => <td key={i.id} className="p-4">{i.motor}</td>)}</tr>
+                        <tr><td className="p-4 font-bold bg-gray-50/50">Transmisión</td>{comparador.map(i => <td key={i.id} className="p-4">{i.transmision}</td>)}</tr>
+                        <tr><td className="p-4 font-bold bg-gray-50/50">Tracción</td>{comparador.map(i => <td key={i.id} className="p-4">{i.traccion}</td>)}</tr>
+                        <tr><td className="p-4 font-bold bg-gray-50/50">Pasajeros</td>{comparador.map(i => <td key={i.id} className="p-4">{i.pasajeros}</td>)}</tr>
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </main>
+          )}
+
+          {/* VISTA 5: COTIZAR.HTML */}
+          {vistaActual === 'cotizar.html' && (
+            <main className="py-12 bg-gray-50 flex-1">
+              <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden">
+                  <div className="bg-neutral-900 text-white p-8 border-b-4 border-red-600 flex items-center justify-between">
+                    <div>
+                      <h1 className="text-2xl font-black uppercase">Cotizador <span className="text-red-500">Mopal Toyota</span></h1>
+                      <p className="text-xs text-gray-400 mt-1">Cotización y financiamiento oficial para Perú.</p>
+                    </div>
+                    <img src={MOPAL_LOGO_URL} alt="Mopal" className="w-12 h-12 object-contain rounded-full border border-white/20" />
+                  </div>
+
+                  <form onSubmit={enviarWhatsapp} className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-xs font-bold uppercase text-gray-700 mb-2">Modelo a Cotizar</label>
+                      <select
+                        value={cotizacion.modelo}
+                        onChange={(e) => setCotizacion({ ...cotizacion, modelo: e.target.value })}
+                        className="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-xs font-bold"
+                      >
+                        {VEHICULOS_DATA.map(v => (
+                          <option key={v.id} value={v.id}>{v.nombre} - ${v.precioUsd.toLocaleString()} USD</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase text-gray-700 mb-2">Sede de Atención</label>
+                      <select
+                        value={cotizacion.sede}
+                        onChange={(e) => setCotizacion({ ...cotizacion, sede: e.target.value })}
+                        className="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-xs font-bold"
+                      >
+                        <option value="Pucallpa">Pucallpa (Jr. Grau 135)</option>
+                        <option value="Huánuco">Huánuco</option>
+                        <option value="Pasco">Pasco</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase text-gray-700 mb-2">Cuota Inicial ({cotizacion.cuotaInicial}%)</label>
+                      <input
+                        type="range" min="10" max="50" step="5"
+                        value={cotizacion.cuotaInicial}
+                        onChange={(e) => setCotizacion({ ...cotizacion, cuotaInicial: e.target.value })}
+                        className="w-full accent-red-600"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase text-gray-700 mb-2">Plazo ({cotizacion.plazoMeses} Meses)</label>
+                      <select
+                        value={cotizacion.plazoMeses}
+                        onChange={(e) => setCotizacion({ ...cotizacion, plazoMeses: e.target.value })}
+                        className="w-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-xs font-bold"
+                      >
+                        <option value="12">12 Meses</option>
+                        <option value="24">24 Meses</option>
+                        <option value="36">36 Meses</option>
+                        <option value="48">48 Meses</option>
+                      </select>
+                    </div>
+
+                    <div className="md:col-span-2 border-t border-gray-100 pt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <input
+                        type="text" placeholder="Nombre Completo" required
+                        value={cotizacion.nombre} onChange={(e) => setCotizacion({ ...cotizacion, nombre: e.target.value })}
+                        className="p-3 bg-gray-50 border border-gray-300 rounded-xl text-xs font-semibold"
+                      />
+                      <input
+                        type="tel" placeholder="Teléfono / WhatsApp" required
+                        value={cotizacion.telefono} onChange={(e) => setCotizacion({ ...cotizacion, telefono: e.target.value })}
+                        className="p-3 bg-gray-50 border border-gray-300 rounded-xl text-xs font-semibold"
+                      />
+                      <input
+                        type="email" placeholder="Correo Electrónico" required
+                        value={cotizacion.correo} onChange={(e) => setCotizacion({ ...cotizacion, correo: e.target.value })}
+                        className="p-3 bg-gray-50 border border-gray-300 rounded-xl text-xs font-semibold"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="md:col-span-2 bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl uppercase text-xs tracking-wider shadow-lg flex items-center justify-center gap-2"
+                    >
+                      <i className="fab fa-whatsapp text-lg"></i>
+                      <span>Enviar Solicitud por WhatsApp</span>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </main>
+          )}
+
+          {/* VISTAS INFORMATIVAS */}
+          {(vistaActual === 'nosotros.html' || vistaActual === 'contacto.html' || vistaActual === 'beneficios.html' || vistaActual === 'servicio-tecnico.html' || vistaActual === 'postventa.html' || vistaActual === 'seguro.html') && (
+            <main className="py-16 bg-white flex-1">
+              <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                {vistaActual === 'nosotros.html' && (
+                  <div>
+                    <h1 className="text-3xl font-black uppercase mb-4">Sobre <span className="text-red-600">Grupo Mopal</span></h1>
+                    <p className="text-gray-600 leading-relaxed mb-6">
+                      Grupo Mopal (Automotores Mopal S.A.) es el concesionario oficial de la marca Toyota en las regiones de Ucayali (Pucallpa), Huánuco y Pasco. Contamos con amplia trayectoria comercializando vehículos 0 km, seminuevos garantizados, repuestos originales y servicio posventa altamente calificado.
+                    </p>
+                  </div>
+                )}
+
+                {vistaActual === 'contacto.html' && (
+                  <div>
+                    <h1 className="text-3xl font-black uppercase mb-4">Nuestras <span className="text-red-600">Sedes</span></h1>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                      <div className="p-6 bg-gray-50 rounded-2xl border border-gray-200">
+                        <h3 className="font-bold text-lg text-gray-900 mb-2">Sede Pucallpa</h3>
+                        <p className="text-xs text-gray-600">Jr. Grau 135, Pucallpa</p>
+                        <p className="text-xs text-red-600 font-bold mt-2">Tel: (061) 123-456</p>
+                      </div>
+                      <div className="p-6 bg-gray-50 rounded-2xl border border-gray-200">
+                        <h3 className="font-bold text-lg text-gray-900 mb-2">Sede Huánuco</h3>
+                        <p className="text-xs text-gray-600"> Vía Inter Regional Huánuco – Tingo María Km. 2.5 (frente al Club Lawn Tennis), distrito de Amarilis, Huánuco</p>
+                        <p className="text-xs text-red-600 font-bold mt-2">Tel: (062) 654-321</p>
+                      </div>
+                      <div className="p-6 bg-gray-50 rounded-2xl border border-gray-200">
+                        <h3 className="font-bold text-lg text-gray-900 mb-2">Sede Pasco</h3>
+                        <p className="text-xs text-gray-600">Av. Los Incas 112, Cerro de Pasco</p>
+                        <p className="text-xs text-red-600 font-bold mt-2">Tel: (063) 789-012</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {vistaActual === 'servicio-tecnico.html' && (
+                  <div>
+                    <h1 className="text-3xl font-black uppercase mb-4">Servicio <span className="text-red-600">Técnico Autorizado</span></h1>
+                    <p className="text-gray-600 text-sm mb-6">Mantenimiento preventivo y correctivo ejecutado por personal capacitado directamente por Toyota.</p>
+                  </div>
+                )}
+
+                {(vistaActual === 'beneficios.html' || vistaActual === 'postventa.html' || vistaActual === 'seguro.html') && (
+                  <div>
+                    <h1 className="text-3xl font-black uppercase mb-4 text-gray-900">Respaldo y Servicios <span className="text-red-600">Toyota</span></h1>
+                    <p className="text-gray-600 text-sm">Garantía, piezas originales y coberturas personalizadas para proteger tu inversión.</p>
+                  </div>
+                )}
+              </div>
+            </main>
+          )}
+
+          {/* FOOTER */}
+          <footer className="bg-neutral-950 text-white pt-16 pb-8 border-t-4 border-red-600">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-neutral-800">
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <img src={MOPAL_LOGO_URL} alt="Mopal" className="w-10 h-10 object-contain rounded-full border border-white/30" />
+                    <span className="font-black text-xl tracking-tighter">GRUPO MOPAL</span>
+                  </div>
+                  <p className="text-gray-400 text-xs leading-relaxed mb-4">
+                    Concesionario oficial de Toyota del Perú en Pucallpa, Huánuco y Pasco.
+                  </p>
+                  <div className="flex gap-3 text-sm text-gray-400">
+                    <a href="#" className="hover:text-red-500"><i className="fab fa-facebook-f"></i></a>
+                    <a href="#" className="hover:text-red-500"><i className="fab fa-instagram"></i></a>
+                    <a href="#" className="hover:text-red-500"><i className="fab fa-youtube"></i></a>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-bold text-sm uppercase text-white mb-4 border-b border-neutral-800 pb-2">Nuestros Autos</h4>
+                  <ul className="flex flex-col gap-2 text-xs text-gray-400 font-semibold">
+                    <li><button onClick={() => navegar('autos-nuevos.html')} className="hover:text-red-500">Autos Nuevos</button></li>
+                    <li><button onClick={() => navegar('autos-seminuevos.html')} className="hover:text-red-500">Seminuevos Certificados</button></li>
+                    <li><button onClick={() => navegar('autos-hibridos.html')} className="hover:text-red-500">Gama Híbrida</button></li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="font-bold text-sm uppercase text-white mb-4 border-b border-neutral-800 pb-2">Servicios</h4>
+                  <ul className="flex flex-col gap-2 text-xs text-gray-400 font-semibold">
+                    <li><button onClick={() => navegar('beneficios.html')} className="hover:text-red-500">Beneficios Mopal</button></li>
+                    <li><button onClick={() => navegar('servicio-tecnico.html')} className="hover:text-red-500">Servicio Técnico</button></li>
+                    <li><button onClick={() => navegar('seguro.html')} className="hover:text-red-500">Seguro Toyota</button></li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="font-bold text-sm uppercase text-white mb-4 border-b border-neutral-800 pb-2">Contacto Directo</h4>
+                  <ul className="flex flex-col gap-2 text-xs text-gray-400 font-semibold">
+                    <li><i className="fas fa-phone text-red-500 mr-2"></i> (061) 123-456</li>
+                    <li><i className="fas fa-envelope text-red-500 mr-2"></i> ventas@grupomopal.pe</li>
+                    <li><i className="fas fa-map-marker-alt text-red-500 mr-2"></i>  Vía Inter Regional Huánuco – Tingo María Km. 2.5 (frente al Club Lawn Tennis), distrito de Amarilis, Huánuco</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="pt-8 flex flex-col sm:flex-row justify-between items-center text-xs text-gray-500 font-semibold gap-4">
+                <p>© 2026 Grupo Mopal - Todos los derechos reservados</p>
+                <p className="text-red-500 font-bold uppercase tracking-wider">Toyota - Siempre Mejor</p>
+              </div>
+            </div>
+          </footer>
+
+          {/* BOTÓN FLOTANTE WHATSAPP */}
+          <a
+            href="https://wa.me/51987654321?text=Hola%20Grupo%20Mopal,%20deseo%20m%C3%A1s%20informaci%C3%B3n"
+            target="_blank"
+            className="fixed bottom-6 right-6 z-50 bg-emerald-500 text-white font-bold px-4 py-3 rounded-full shadow-2xl flex items-center gap-2 text-xs uppercase tracking-wider hover:bg-emerald-600 transition-transform active:scale-95"
+          >
+            <i className="fab fa-whatsapp text-xl"></i>
+            <span className="hidden sm:inline">¿Necesitas Ayuda?</span>
+          </a>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
